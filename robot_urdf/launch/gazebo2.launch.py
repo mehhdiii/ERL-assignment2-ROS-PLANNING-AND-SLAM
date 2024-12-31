@@ -15,7 +15,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     test_robot_description_share = FindPackageShare(package='robot_urdf').find('robot_urdf')
     default_model_path = os.path.join(test_robot_description_share, 'urdf/robot6.xacro')
-    rviz_config_path = os.path.join(test_robot_description_share, 'config/rviz.rviz')
+    rviz_config_path = os.path.join(test_robot_description_share, 'config/rviz_slam_cam_aruco.rviz')
     default_world_path = os.path.join(test_robot_description_share, 'worlds/assignment2.world')
 
     robot_state_publisher_node = Node(
