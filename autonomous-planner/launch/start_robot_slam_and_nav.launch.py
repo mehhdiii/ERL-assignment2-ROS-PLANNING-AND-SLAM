@@ -22,7 +22,6 @@ def generate_launch_description():
     robot_urdf_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(robot_urdf_launch_dir, 'gazebo2.launch.py'))
     )
-
     # Include the slam_toolbox launch file with parameters
     slam_toolbox_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(slam_toolbox_launch_dir, 'online_sync_launch.py')),
