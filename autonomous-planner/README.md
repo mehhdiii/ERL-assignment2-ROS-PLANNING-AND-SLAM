@@ -24,5 +24,3 @@ sudo apt-get install ros-humble-behaviortree-cpp
 apt-get install ros-humble-plansys2-pddl-parser
 
 sudo apt install libsuitesparse-dev
-
-pe
