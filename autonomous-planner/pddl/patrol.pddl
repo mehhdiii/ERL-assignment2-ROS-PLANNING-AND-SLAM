@@ -11,8 +11,8 @@ waypoint
 (:predicates
 
 (robot_at ?r - robot ?wp - waypoint)
-(connected ?wp1 ?wp2 - waypoint)
-(patrolled ?wp - waypoint)
+(visited ?wp - waypoint)              ; Waypoint has been visited
+(visited_and_scanned ?wp - waypoint)  ; Waypoint has been visited and its marker scanned
 
 );; end Predicates ;;;;;;;;;;;;;;;;;;;;
 ;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -24,23 +24,23 @@ waypoint
     :parameters (?r - robot ?wp1 ?wp2 - waypoint)
     :duration ( = ?duration 5)
     :condition (and
-        (at start(connected ?wp1 ?wp2))
         (at start(robot_at ?r ?wp1))
         )
     :effect (and
         (at start(not(robot_at ?r ?wp1)))
         (at end(robot_at ?r ?wp2))
+        (at end(visited ?wp2))
     )
 )
 
-(:durative-action patrol
+(:durative-action scan_marker
     :parameters (?r - robot ?wp - waypoint)
     :duration ( = ?duration 5)
     :condition (and
         (at start(robot_at ?r ?wp))
        )
     :effect (and
-        (at end(patrolled ?wp))
+        (at end(visited_and_scanned ?wp))
     )
 )
 

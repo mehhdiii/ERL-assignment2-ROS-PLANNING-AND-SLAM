@@ -40,12 +40,12 @@ public:
     geometry_msgs::msg::PoseStamped wp;
     wp.header.frame_id = "map";
     wp.header.stamp = now();
-    wp.pose.position.x = 0.0;
-    wp.pose.position.y = -2.0;
-    wp.pose.position.z = 0.0;
+    wp.pose.position.x = 5.410496;
+    wp.pose.position.y = 1.804534;
+    wp.pose.position.z = 0.099997;
     wp.pose.orientation.x = 0.0;
     wp.pose.orientation.y = 0.0;
-    wp.pose.orientation.z = 0.0;
+    wp.pose.orientation.z = 2.059526;
     wp.pose.orientation.w = 1.0;
     waypoints_["wp1"] = wp;
 
