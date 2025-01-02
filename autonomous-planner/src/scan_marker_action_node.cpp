@@ -44,11 +44,17 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State &previous_state)
   {
+    RCLCPP_INFO(rclcpp::get_logger("On activate triggered"), "On activate triggered");
+
     progress_ = 0.0;
 
-    // cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+      RCLCPP_INFO(rclcpp::get_logger("On 51"), "On 51");
+
+
+    cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
     aruco_pose_sub_ = this->create_subscription<ros2_aruco_interfaces::msg::ArucoMarkers>("aruco_poses", 10, std::bind(&ScanMarker::aruco_pose_callback, this, _1));
-    // cmd_vel_pub_->on_activate();
+    RCLCPP_INFO(rclcpp::get_logger("On 57"), "On 57");
+
 
     return ActionExecutorClient::on_activate(previous_state);
   }
@@ -56,8 +62,6 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State &previous_state)
   {
-    cmd_vel_pub_->on_deactivate();
-
     return ActionExecutorClient::on_deactivate(previous_state);
   }
 
@@ -68,7 +72,8 @@ private:
 
   void aruco_pose_callback(const ros2_aruco_interfaces::msg::ArucoMarkers & msg)
   {
-    RCLCPP_INFO(get_logger(), "Received aruco pose");
+    RCLCPP_INFO(rclcpp::get_logger("Received aruco pose"), "Received aruco pose");
+
     if (msg.poses.size() > 0) {
       // ASSUMING THERE IS ONLY ONE MARKER DETECTED AT ALL TIMES!
       for (long unsigned int i = 0; i < msg.poses.size(); i++) {
@@ -79,6 +84,8 @@ private:
   }
   void do_work()
   {
+      RCLCPP_INFO(rclcpp::get_logger("On 90"), "On 90");
+
     if (arucos_map.find(last_id) == arucos_map.end()) {
       arucos_map[last_id] = last_coord;
       finish(true, 1.0, "MARKER FOUND! Scanning marker completed");
@@ -87,9 +94,7 @@ private:
     send_feedback(progress_, "Scan Marker running");
   }
 
-  float progress_ = 0; // 0 MEANS NO MARKER FOUND; 1 MEANS MARKER FOUND
-
-  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+  float progress_ = 0.0; // 0 MEANS NO MARKER FOUND; 1 MEANS MARKER FOUND
 
 };
 
