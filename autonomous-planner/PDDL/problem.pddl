@@ -20,7 +20,10 @@
     (not (marker_scanned wp4))
     
     (not (target_reached wp5))
-    (marker_scanned wp5)
+    (not_visited wp1)
+    (not_visited wp2)
+    (not_visited wp3)
+    (not_visited wp4)
   )
 
   ;; Define the goal state
@@ -29,4 +32,4 @@
       (target_reached wp5)
 )
 )
-)
+)   

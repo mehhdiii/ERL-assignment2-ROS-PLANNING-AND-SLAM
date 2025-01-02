@@ -1,23 +1,30 @@
-set instance robot1 robot
+set instance robot1 robot  
 
-set instance wp1 waypoint
-set instance wp2 waypoint
-set instance wp3 waypoint
-set instance wp4 waypoint
+set instance wp1 waypoint  
+set instance wp2 waypoint  
+set instance wp3 waypoint  
+set instance wp4 waypoint  
+set instance wp5 waypointf  
 
-set instance wp5 waypointf
+set instance counter1 counter  
 
-set instance counter1 counter
+set predicate (robot_at robot1 wp1)  
+set predicate (final_wp wp5)  
 
-set predicate (robot_at robot1 wp1) 
-set predicate (final_wp wp5)        
+set predicate (not_visited wp1)  
+set predicate (not_visited wp2)  
+set predicate (not_visited wp3)  
+set predicate (not_visited wp4)  
 
-set predicate (not_visited wp1)
-set predicate (not_visited wp2)
-set predicate (not_visited wp3)
-set predicate (not_visited wp4)
+set predicate (not (marker_scanned wp1))  
+set predicate (not (marker_scanned wp2))  
+set predicate (not (marker_scanned wp3))  
+set predicate (not (marker_scanned wp4))  
 
-set goal ( and (target_reached wp5 ))
+set predicate (not (target_reached wp5))  
 
-get plan
+set numeric (counter_value counter1 0)  
 
+set goal (and (target_reached wp5))  
+
+get plan  
