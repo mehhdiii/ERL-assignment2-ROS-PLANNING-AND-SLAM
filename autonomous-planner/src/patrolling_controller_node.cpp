@@ -46,22 +46,34 @@ public:
 
   void init_knowledge()
   {
-    problem_expert_->addInstance(plansys2::Instance{"r2d2", "robot"});
+    problem_expert_->addInstance(plansys2::Instance{"robot1", "robot"});
     problem_expert_->addInstance(plansys2::Instance{"wp_control", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp1", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp2", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp3", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp4", "waypoint"});
 
-    problem_expert_->addPredicate(plansys2::Predicate("(robot_at r2d2 wp_control)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp1)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp1 wp_control)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp2)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp2 wp_control)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp3)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp3 wp_control)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp4)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(connected wp4 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp1))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp2))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp3))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp4))"));
+
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp4))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp2))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp3))"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp4))"));
+
+
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp1)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp1 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp2)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp2 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp3)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp3 wp_control)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp4)"));
+    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp4 wp_control)"));
   }
 
   void step()
@@ -70,7 +82,7 @@ public:
       case STARTING:
         {
           // Set the goal for next state
-          problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
+          problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1))"));
 
           // Compute the plan
           auto domain = domain_expert_->getDomain();
@@ -82,10 +94,12 @@ public:
               parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
             break;
           }
+          std::cout << "A STUPID LOOP " <<std::endl;
 
           // Execute the plan
           if (executor_client_->start_plan_execution(plan.value())) {
             state_ = PATROL_WP1;
+            std::cout << "DAUNE " <<std::endl;
           }
         }
         break;
@@ -104,10 +118,10 @@ public:
               std::cout << "Successful finished " << std::endl;
 
               // Cleanning up
-              problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp1)"));
+              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp1)"));
 
               // Set the goal for next state
-              problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp2))"));
+              // problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp2))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();
@@ -132,19 +146,19 @@ public:
                 }
               }
 
-              // Replan
-              auto domain = domain_expert_->getDomain();
-              auto problem = problem_expert_->getProblem();
-              auto plan = planner_client_->getPlan(domain, problem);
+              // // Replan
+              // auto domain = domain_expert_->getDomain();
+              // auto problem = problem_expert_->getProblem();
+              // auto plan = planner_client_->getPlan(domain, problem);
 
-              if (!plan.has_value()) {
-                std::cout << "Unsuccessful replan attempt to reach goal " <<
-                  parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
-                break;
-              }
+              // if (!plan.has_value()) {
+              //   std::cout << "Unsuccessful replan attempt to reach goal " <<
+              //     parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
+              //   break;
+              // }
 
-              // Execute the plan
-              executor_client_->start_plan_execution(plan.value());
+              // // Execute the plan
+              // executor_client_->start_plan_execution(plan.value());
             }
           }
         }

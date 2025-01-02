@@ -80,8 +80,8 @@ def generate_launch_description():
     
     scan_action_node = Node(
         package='autonomous-planner',
-        executable='scan_action_node.py',
-        name='scan_action_node',
+        executable='scan_marker_action_node',
+        name='scan_marker_action_node',
         output='screen',
         parameters=[]
     )
@@ -95,7 +95,7 @@ def generate_launch_description():
         plansys2_launch,
         fake_nav2_node,
         move_action_node,
-        patrol_action_node,
-        scan_action_node,
+        # patrol_action_node,
+        # scan_action_node,
         aruco_node
     ])
