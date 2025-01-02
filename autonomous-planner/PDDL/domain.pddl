@@ -1,26 +1,26 @@
-(define (domain simple)
-(:requirements :strips :typing :adl :fluents :durative-actions)
+(define (domain robot_marker_scanning)
 
-;; Types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(:types
+  (:requirements :strips :typing :fluents   :universal-preconditions)
+  
+  (:types
     waypoint robot counter waypointf
-  );; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
-(:predicates
+  )
+  
+  (:predicates
     (robot_at ?r - robot ?wp - waypoint) ; Robot is at a specific waypoint
     (visited ?wp - waypoint)            ; Waypoint has been visited
     (marker_scanned ?wp - waypoint)     ; Marker at the waypoint has been scanned
     (target_reached ?wp - waypointf)     ; Target waypoint has been reached
     (final_wp ?wp - waypointf)
     (not_visited ?wp - waypoint)
-);; end Predicates ;;;;;;;;;;;;;;;;;;;;
-;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
-(:functions
-
-);; end Functions ;;;;;;;;;;;;;;;;;;;;
-;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(:action move
+  )
+  
+  (:functions
+    (counter_value ?c - counter)        ; Value of a counter object
+  )
+  
+  ;; Move to a waypoint
+  (:action move
     :parameters (?r - robot ?from ?to - waypoint)
     :precondition (and
       (robot_at ?r ?from)
@@ -31,9 +31,9 @@
       (not (robot_at ?r ?from))
     )
   )
-
-
-(:action scan_marker
+  
+  ;; Scan the marker at a waypoint and increment the counter
+  (:action scan_marker
     :parameters (?r - robot ?wp - waypoint )
     :precondition (and
       (robot_at ?r ?wp)
@@ -46,6 +46,8 @@
      
     )
   )
+  
+  ;; Move to the target waypoint after all markers are scanned
 
 
 
@@ -66,12 +68,4 @@
 
 
 )
-
-
-
-
-
-
-
-
-);; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;
+)
