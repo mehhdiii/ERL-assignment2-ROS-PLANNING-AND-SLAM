@@ -7,7 +7,7 @@ import os
 
 def generate_launch_description():
 
-    test_robot_description_share = FindPackageShare(package='autonomous-planner').find('autonomous-planner')
+    test_robot_description_share = FindPackageShare(package='autonomous_planner').find('autonomous_planner')
     slam_params_file_path = os.path.join(test_robot_description_share, 'params/mapper_params_online_sync.yaml')
     params_file_path = os.path.join(test_robot_description_share, 'params/nav2_params.yaml')
 
@@ -63,7 +63,7 @@ def generate_launch_description():
     )
 
     move_action_node = Node(
-        package='autonomous-planner',
+        package='autonomous_planner',
         executable='move_action_node',
         name='move_action_node',
         output='screen',
@@ -71,7 +71,7 @@ def generate_launch_description():
     )
 
     patrol_action_node = Node(
-        package='autonomous-planner',
+        package='autonomous_planner',
         executable='patrol_action_node',
         name='patrol_action_node',
         output='screen',
@@ -79,7 +79,7 @@ def generate_launch_description():
     )
     
     scan_action_node = Node(
-        package='autonomous-planner',
+        package='autonomous_planner',
         executable='scan_marker_action_node',
         name='scan_marker_action_node',
         output='screen',
@@ -96,6 +96,6 @@ def generate_launch_description():
         fake_nav2_node,
         move_action_node,
         # patrol_action_node,
-        # scan_action_node,
+        scan_action_node,
         aruco_node
     ])
