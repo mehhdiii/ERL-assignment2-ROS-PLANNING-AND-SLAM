@@ -82,7 +82,7 @@ public:
       case STARTING:
         {
           // Set the goal for next state
-          problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1)(visited_and_scanned wp2)(visited_and_scanned wp3)(visited_and_scanned wp4))"));
+          problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1))"));
 
           // Compute the plan
           auto domain = domain_expert_->getDomain();
@@ -118,10 +118,10 @@ public:
               std::cout << "Successful finished " << std::endl;
 
               // Cleanning up
-              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp1)"));
+              // problem_expert_->removePredicate(plansys2::Predicate("(visited_and_scanned wp1)"));
 
               // Set the goal for next state
-              // problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp2))"));
+              // problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp2))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();
@@ -136,7 +136,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP2;
+                // state_ = PATROL_WP2;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -177,11 +177,11 @@ public:
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
-              // Cleanning up
-              problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp2)"));
+              // // Cleanning up
+              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp2)"));
 
               // Set the goal for next state
-              problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp3))"));
+              problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp3))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();
@@ -237,11 +237,11 @@ public:
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
-              // Cleanning up
-              problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp3)"));
+              // // Cleanning up
+              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp3)"));
 
               // Set the goal for next state
-              problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp4))"));
+              problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp4))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();
@@ -297,11 +297,11 @@ public:
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
-              // Cleanning up
-              problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp4)"));
+              // // Cleanning up
+              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp4)"));
 
               // Set the goal for next state
-              problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
+              problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();

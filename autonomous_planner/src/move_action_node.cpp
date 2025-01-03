@@ -85,6 +85,9 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state)
   {
+
+    RCLCPP_INFO(get_logger(), "on_activate");
+
     send_feedback(0.0, "Move starting");
 
     navigation_action_client_ =
@@ -112,6 +115,7 @@ public:
 
     auto send_goal_options =
       rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+    RCLCPP_INFO(get_logger(), "t7t send goal options");
 
     send_goal_options.feedback_callback = [this](
       NavigationGoalHandle::SharedPtr,
@@ -119,6 +123,8 @@ public:
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
+            RCLCPP_INFO(get_logger(), "fi wst send goal callback");
+
       };
 
     send_goal_options.result_callback = [this](auto) {
@@ -134,6 +140,7 @@ public:
 private:
   double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
   {
+
     return sqrt(
       (pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
       (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
