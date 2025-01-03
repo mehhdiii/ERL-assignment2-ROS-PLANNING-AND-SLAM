@@ -121,7 +121,7 @@ public:
               // problem_expert_->removePredicate(plansys2::Predicate("(visited_and_scanned wp1)"));
 
               // Set the goal for next state
-              // problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp2))"));
+              problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp2))"));
 
               // Compute the plan
               auto domain = domain_expert_->getDomain();
@@ -136,7 +136,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                // state_ = PATROL_WP2;
+                state_ = PATROL_WP2;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -146,19 +146,19 @@ public:
                 }
               }
 
-              // // Replan
-              // auto domain = domain_expert_->getDomain();
-              // auto problem = problem_expert_->getProblem();
-              // auto plan = planner_client_->getPlan(domain, problem);
+              // Replan
+              auto domain = domain_expert_->getDomain();
+              auto problem = problem_expert_->getProblem();
+              auto plan = planner_client_->getPlan(domain, problem);
 
-              // if (!plan.has_value()) {
-              //   std::cout << "Unsuccessful replan attempt to reach goal " <<
-              //     parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
-              //   break;
-              // }
+              if (!plan.has_value()) {
+                std::cout << "Unsuccessful replan attempt to reach goal " <<
+                  parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
+                break;
+              }
 
-              // // Execute the plan
-              // executor_client_->start_plan_execution(plan.value());
+              // Execute the plan
+              executor_client_->start_plan_execution(plan.value());
             }
           }
         }
