@@ -82,7 +82,7 @@ public:
       case STARTING:
         {
           // Set the goal for next state
-          problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1))"));
+          problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1)(visited_and_scanned wp2)(visited_and_scanned wp3)(visited_and_scanned wp4))"));
 
           // Compute the plan
           auto domain = domain_expert_->getDomain();
