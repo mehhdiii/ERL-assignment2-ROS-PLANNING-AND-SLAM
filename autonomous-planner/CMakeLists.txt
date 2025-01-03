@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(autonomous-planner)
+project(autonomous_planner)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -17,6 +17,11 @@ find_package(plansys2_planner REQUIRED)
 find_package(plansys2_problem_expert REQUIRED)
 find_package(plansys2_pddl_parser REQUIRED)
 find_package(ros2_aruco_interfaces REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetLastMarker.srv"
+  DEPENDENCIES std_msgs
+ )
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -63,6 +68,8 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
+
+
 
 
 
