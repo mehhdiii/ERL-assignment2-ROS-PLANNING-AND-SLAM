@@ -1,17 +1,3 @@
-// Copyright 2019 Intelligent Robotics Lab
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #include <memory>
 #include <iostream>
 #include <list>
@@ -19,7 +5,7 @@
 #include <algorithm>
 #include "geometry_msgs/msg/twist.hpp"
 #include "ros2_aruco_interfaces/msg/aruco_markers.hpp"
-
+// #include "autonomous_planner/srv/get_last_marker.hpp"
 #include "plansys2_executor/ActionExecutorClient.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -34,7 +20,6 @@ class ScanMarker : public plansys2::ActionExecutorClient
 {
 public:
   rclcpp::Subscription<ros2_aruco_interfaces::msg::ArucoMarkers>::SharedPtr aruco_pose_sub_;
-  
   ScanMarker()
       : plansys2::ActionExecutorClient("scan_marker", 1s)
   {
@@ -48,12 +33,8 @@ public:
 
     progress_ = 0.0;
 
-      RCLCPP_INFO(rclcpp::get_logger("On 51"), "On 51");
-
-
-    cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    // cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
     aruco_pose_sub_ = this->create_subscription<ros2_aruco_interfaces::msg::ArucoMarkers>("aruco_poses", 10, std::bind(&ScanMarker::aruco_pose_callback, this, _1));
-    RCLCPP_INFO(rclcpp::get_logger("On 57"), "On 57");
 
 
     return ActionExecutorClient::on_activate(previous_state);
@@ -66,6 +47,7 @@ public:
   }
 
 private:
+  // SUBSCRIBER: ARUCO POSE
   std::map<int, std::tuple<float, float>> arucos_map;
   int last_id;
   std::tuple<float, float> last_coord; 
@@ -82,6 +64,8 @@ private:
       }
     }
   }
+
+  // SUBSCRIBER: SYSPLAN ACTION
   void do_work()
   {
       RCLCPP_INFO(rclcpp::get_logger("On 90"), "On 90");
@@ -96,6 +80,16 @@ private:
 
   float progress_ = 0.0; // 0 MEANS NO MARKER FOUND; 1 MEANS MARKER FOUND
 
+  // SERVICE: GET SMALLEST ARUCO POSE
+  // void get_last_marker_service_callback(const std::shared_ptr<> request,
+  //          std::shared_ptr<example_interfaces::srv::AddTwoInts::Response> response)
+  // {
+  //   response->sum = request->a + request->b;
+  //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Incoming request\na: %ld"
+  //                                             " b: %ld",
+  //               request->a, request->b);
+  //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending back response: [%ld]", (long int)response->sum);
+  // }
 };
 
 int main(int argc, char **argv)
