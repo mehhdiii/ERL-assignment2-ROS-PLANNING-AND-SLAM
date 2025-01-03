@@ -38,31 +38,36 @@ public:
   : plansys2::ActionExecutorClient("move", 500ms)
   {
     geometry_msgs::msg::PoseStamped wp;
-    wp.header.frame_id = "map";
+     wp.header.frame_id = "map";
     wp.header.stamp = now();
-    wp.pose.position.x = 5.410496;
-    wp.pose.position.y = 1.804534;
-    wp.pose.position.z = 0.099997;
+    wp.pose.position.x = 5.62;
+    wp.pose.position.y = 1.76;
+    wp.pose.position.z = 0.01;
     wp.pose.orientation.x = 0.0;
     wp.pose.orientation.y = 0.0;
-    wp.pose.orientation.z = 2.059526;
+    wp.pose.orientation.z = 2.259526;
     wp.pose.orientation.w = 1.0;
     waypoints_["wp1"] = wp;
 
-    wp.pose.position.x = 1.8;
-    wp.pose.position.y = 0.0;
+    wp.pose.position.x = 6.97;
+    wp.pose.position.y = -5.12;
+    wp.pose.orientation.z = 1.62;
     waypoints_["wp2"] = wp;
 
-    wp.pose.position.x = 0.0;
-    wp.pose.position.y = 2.0;
+    wp.pose.position.x = -2.73;
+    wp.pose.position.y = -7.88;
+    wp.pose.orientation.z = -3.08;
     waypoints_["wp3"] = wp;
 
-    wp.pose.position.x = -0.5;
-    wp.pose.position.y = -0.5;
+    wp.pose.position.x = -7.03;
+    wp.pose.position.y = 1.28;
+    wp.pose.orientation.z = -2.19;
     waypoints_["wp4"] = wp;
 
-    wp.pose.position.x = -2.0;
-    wp.pose.position.y = -0.4;
+    wp.pose.position.x = 2.0;
+    wp.pose.position.y = 2.0;
+    wp.pose.orientation.z = -0.0;
+
     waypoints_["wp_control"] = wp;
 
     using namespace std::placeholders;

@@ -17,11 +17,10 @@ find_package(plansys2_planner REQUIRED)
 find_package(plansys2_problem_expert REQUIRED)
 find_package(plansys2_pddl_parser REQUIRED)
 find_package(ros2_aruco_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(autonomous_planner_interfaces REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/GetLastMarker.srv"
-  DEPENDENCIES std_msgs
- )
+
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -36,6 +35,7 @@ set(dependencies
     plansys2_problem_expert
     plansys2_pddl_parser
     ros2_aruco_interfaces
+    autonomous_planner_interfaces
 )
 
 add_executable(move_action_node src/move_action_node.cpp)
