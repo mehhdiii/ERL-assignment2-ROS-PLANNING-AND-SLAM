@@ -53,11 +53,6 @@ ament_target_dependencies(patrolling_controller_node ${dependencies})
 
 install(DIRECTORY launch pddl params DESTINATION share/${PROJECT_NAME})
 
-install(
-  PROGRAMS
-    src/scan_action_node.py
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(TARGETS
   move_action_node

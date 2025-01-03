@@ -7,7 +7,7 @@ import os
 
 def generate_launch_description():
 
-    test_robot_description_share = FindPackageShare(package='autonomous-planner').find('autonomous-planner')
+    test_robot_description_share = FindPackageShare(package='autonomous_planner').find('autonomous_planner')
     slam_params_file_path = os.path.join(test_robot_description_share, 'params/mapper_params_online_sync.yaml')
     params_file_path = os.path.join(test_robot_description_share, 'params/nav2_params.yaml')
     # Paths to the launch files
