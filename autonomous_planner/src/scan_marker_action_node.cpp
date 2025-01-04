@@ -21,6 +21,7 @@ class ScanMarker : public plansys2::ActionExecutorClient
 {
 public:
   rclcpp::Subscription<ros2_aruco_interfaces::msg::ArucoMarkers>::SharedPtr aruco_pose_sub_;
+  rclcpp::Service<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr service;
   ScanMarker()
       : plansys2::ActionExecutorClient("scan_marker", 1s)
   {
@@ -30,13 +31,12 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State &previous_state)
   {
-    RCLCPP_INFO(rclcpp::get_logger("On activate triggered"), "On activate triggered");
+    RCLCPP_INFO(rclcpp::get_logger("Starting scan action node"), "Starting scan action node");
 
     progress_ = 0.0;
 
-    rclcpp::Service<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr service =
-        this->create_service<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco", std::bind(&ScanMarker::get_smallest_aruco_callback, this, std::placeholders::_1, std::placeholders::_2) );
-
+    service =
+        this->create_service<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco", std::bind(&ScanMarker::get_smallest_aruco_callback, this, std::placeholders::_1, std::placeholders::_2));
 
     aruco_pose_sub_ = this->create_subscription<ros2_aruco_interfaces::msg::ArucoMarkers>("aruco_markers", 10, std::bind(&ScanMarker::aruco_pose_callback, this, _1));
     
@@ -56,17 +56,17 @@ private:
   std::map<int, std::tuple<float, float, float>> arucos_map;
   int last_id = 0;
   std::tuple<float, float, float> last_coord; 
-  // float last_theta; 
-
 
   void aruco_pose_callback(const ros2_aruco_interfaces::msg::ArucoMarkers & msg)
   {
-    RCLCPP_INFO(rclcpp::get_logger("Received aruco pose"), "Received aruco pose");
+    RCLCPP_INFO(rclcpp::get_logger("acuco_markers Subscriber"), "Received aruco pose");
 
     if (msg.poses.size() > 0) {
       // ASSUMING THERE IS ONLY ONE MARKER DETECTED AT ALL TIMES!
       for (long unsigned int i = 0; i < msg.poses.size(); i++) {
         if (msg.marker_ids[i] != 0){
+          RCLCPP_INFO(rclcpp::get_logger("acuco_markers Subscriber"), "marker id: %d", msg.marker_ids[i]);
+
           last_id = msg.marker_ids[i];
           last_coord = std::make_tuple(msg.poses[i].position.x, msg.poses[i].position.y, msg.poses[i].orientation.z);
    
@@ -78,12 +78,12 @@ private:
   // SUBSCRIBER: SYSPLAN ACTION
   void do_work()
   {
-      RCLCPP_INFO(rclcpp::get_logger("On 90"), "On 90");
+    RCLCPP_INFO(rclcpp::get_logger("scan action node"), "scanning...");
 
     if (last_id != 0 && arucos_map.find(last_id) == arucos_map.end()) {
       arucos_map[last_id] = last_coord;
       progress_ = 0;
-      RCLCPP_INFO(rclcpp::get_logger("Found marker"), "Found marker. id: %d", last_id);
+      RCLCPP_INFO(rclcpp::get_logger("Found marker"), "MARKER FOUND! marker_sid: %d", last_id);
 
       finish(true, 1.0, "MARKER FOUND! Scanning marker completed");
 
@@ -98,11 +98,12 @@ private:
                                    std::shared_ptr<autonomous_planner_interfaces::srv::GetLastMarker::Response> response)
   {
     (void)request;
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Incoming request");
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending back response");
+    RCLCPP_INFO(rclcpp::get_logger("get_smallest_aruco Service"), "Incoming service request");
 
 
     int smallest_last_id = arucos_map.begin()->first;
+
+    RCLCPP_INFO(rclcpp::get_logger("get_smallest_aruco Service"), "smallest_id: %d", smallest_last_id);
 
     response->marker_id = smallest_last_id;
     response->x = std::get<0>(arucos_map[smallest_last_id]);
