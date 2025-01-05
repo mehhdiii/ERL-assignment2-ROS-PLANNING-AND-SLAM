@@ -27,6 +27,26 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+#include <chrono>
+using namespace std::chrono_literals;
+
+#include "autonomous_planner_interfaces/srv/get_last_marker.hpp"
+
+
+
+// struct Point {
+//     double x;
+//     double y;
+// };
+
+// // Function to calculate the Euclidean distance between two points
+// double calculateDistance(const Point& p1, const Point& p2) {
+//     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+// }
+
+
+const std::string WPFINAL = "waypoint_final";
+
 class PatrollingController : public rclcpp::Node
 {
 public:
@@ -285,6 +305,66 @@ public:
         break;
       case PATROL_WP4:
         {
+          rclcpp::Client<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr client =this->create_client<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco_client");
+
+          auto request = std::make_shared<autonomous_planner_interfaces::srv::GetLastMarker::Request>();
+
+
+          while (!client->wait_for_service(1s)) {
+            if (!rclcpp::ok()) {
+              RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+              return;
+            }
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
+          }
+
+
+
+          auto result = client->async_send_request(request);
+          // Wait for the result.
+          if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+            rclcpp::FutureReturnCode::SUCCESS)
+          {
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco id found!: %d", result.get()->marker_id);
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco wp found!: %s", result.get()->waypoint.c_str());
+          } else {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service get_smallest_aruco");
+          }
+
+
+          // // Define your location
+          // Point myLocation = {result.get()->x, result.get()->y};
+
+          // // Define the four other locations
+          // Point wp1 = {5.62, 1.76};
+          // Point wp2 = {6.97, -5.12};
+          // Point wp3 = {-2.73, -7.88};
+          // Point wp4 = {-7.03, 1.28};
+
+          // // Create an array of locations
+          // Point locations[] = {wp1, wp2, wp3, wp4};
+
+          // // Array of waypoint names
+          // const char* waypointNames[] = {"wp1", "wp2", "wp3", "wp4"};
+
+          // double smallestDistance = std::numeric_limits<double>::max();
+          // const char* WPFINAL = nullptr;
+
+          // // Calculate the distance to each location
+          // for (int i = 0; i < 4; ++i) {
+          //     double distance = calculateDistance(myLocation, locations[i]);
+          //     if (distance < smallestDistance) {
+          //         smallestDistance = distance;
+          //         WPFINAL = waypointNames[i];
+          //     }
+          // }
+
+          // // Output the result
+          // std::cout << "The closest location is " << WPFINAL << " with a distance of " << smallestDistance << std::endl;
+
+          const char* WPFINAL = result.get()->waypoint.c_str();
+
+
           auto feedback = executor_client_->getFeedBack();
 
           for (const auto & action_feedback : feedback.action_execution_status) {
@@ -299,10 +379,12 @@ public:
 
               // // Cleanning up
               // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp4)"));
-
               // Set the goal for next state
-              problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp1))"));
+              // problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp%d))")lastwp);
+              std::string goal = std::string("(and(visited_and_scanned ") + WPFINAL + "))";
+              std::cout << "Goal: " << goal << std::endl;
 
+              problem_expert_->setGoal(plansys2::Goal(goal));
               // Compute the plan
               auto domain = domain_expert_->getDomain();
               auto problem = problem_expert_->getProblem();
