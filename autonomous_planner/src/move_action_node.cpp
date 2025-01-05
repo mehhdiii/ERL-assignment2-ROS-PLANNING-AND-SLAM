@@ -34,11 +34,11 @@ using namespace std::chrono_literals;
 class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
-  MoveAction()
-  : plansys2::ActionExecutorClient("move", 500ms)
-  {
+  MoveAction():
+  plansys2::ActionExecutorClient("move", 1s)
+  { 
     geometry_msgs::msg::PoseStamped wp;
-     wp.header.frame_id = "map";
+    wp.header.frame_id = "map";
     wp.header.stamp = now();
     wp.pose.position.x = 5.62;
     wp.pose.position.y = 1.76;
@@ -66,7 +66,7 @@ public:
 
     wp.pose.position.x = 2.0;
     wp.pose.position.y = 2.0;
-    wp.pose.orientation.z = -0.0;
+    wp.pose.orientation.z = 0.0;
 
     waypoints_["wp_control"] = wp;
 
@@ -120,11 +120,17 @@ public:
     send_goal_options.feedback_callback = [this](
       NavigationGoalHandle::SharedPtr,
       NavigationFeedback feedback) {
+          // RCLCPP_INFO(get_logger(), "fi wst send goal callback");
+
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
+          
             RCLCPP_INFO(get_logger(), "fi wst send goal callback");
-
+        //   // Check if within tolerance
+        // if (feedback->distance_remaining <= tolerance_) {
+        //   done = true;
+        // }
       };
 
     send_goal_options.result_callback = [this](auto) {
@@ -138,6 +144,8 @@ public:
   }
 
 private:
+  // double tolerance_ = 0.05;  // Define a tolerance for reaching the goal
+//  bool done=false;
   double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
   {
 
@@ -148,6 +156,10 @@ private:
 
   void do_work()
   {
+        //       // Check if within tolerance
+        // if (done) {
+        //   finish(true, 1.0, "Move completed within tolerance");
+        // }
   }
 
   std::map<std::string, geometry_msgs::msg::PoseStamped> waypoints_;
