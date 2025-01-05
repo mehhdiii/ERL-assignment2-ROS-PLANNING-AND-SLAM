@@ -30,7 +30,7 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 
 using namespace std::chrono_literals;
-
+double tolerance=0.5;
 class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
@@ -45,7 +45,7 @@ public:
     wp.pose.position.z = 0.01;
     wp.pose.orientation.x = 0.0;
     wp.pose.orientation.y = 0.0;
-    wp.pose.orientation.z = 2.259526;
+    wp.pose.orientation.z = 2.059526;
     wp.pose.orientation.w = 1.0;
     waypoints_["wp1"] = wp;
 
@@ -125,11 +125,17 @@ public:
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
+
+          progress= std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move)));
+          progress_f=1-progress;
         //   // Check if within tolerance
         // if (feedback->distance_remaining <= tolerance_) {
         //   done = true;
         // }
+
+
       };
+      
 
     send_goal_options.result_callback = [this](auto) {
         finish(true, 1.0, "Move completed");
@@ -140,6 +146,7 @@ public:
 
     return ActionExecutorClient::on_activate(previous_state);
   }
+  
 
 private:
   // double tolerance_ = 0.05;  // Define a tolerance for reaching the goal
@@ -152,12 +159,23 @@ private:
       (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
   }
 
-  void do_work()
+  double progress;
+  double progress_f;
+  bool done=((progress_f)<tolerance);
+   
+   void do_work()
   {
-        //       // Check if within tolerance
-        // if (done) {
-        //   finish(true, 1.0, "Move completed within tolerance");
-        // }
+     if(done){
+
+       finish(true, 1.0, "Move completed");
+    }
+    else{
+    RCLCPP_INFO(get_logger(), "not arrived yet");
+
+
+
+    }
+        
   }
 
   std::map<std::string, geometry_msgs::msg::PoseStamped> waypoints_;

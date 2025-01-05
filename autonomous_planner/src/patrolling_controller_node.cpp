@@ -399,7 +399,7 @@ public:
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
                 // Loop to WP1
-                state_ = PATROL_WP1;
+                state_ = ENDING;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -426,13 +426,15 @@ public:
           }
         }
         break;
+      case ENDING:
+        break;
       default:
         break;
     }
   }
 
 private:
-  typedef enum {STARTING, PATROL_WP1, PATROL_WP2, PATROL_WP3, PATROL_WP4} StateType;
+  typedef enum {STARTING, PATROL_WP1, PATROL_WP2, PATROL_WP3, PATROL_WP4, ENDING} StateType;
   StateType state_;
 
   std::shared_ptr<plansys2::DomainExpertClient> domain_expert_;
