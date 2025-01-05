@@ -125,8 +125,6 @@ public:
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
-          
-            RCLCPP_INFO(get_logger(), "fi wst send goal callback");
         //   // Check if within tolerance
         // if (feedback->distance_remaining <= tolerance_) {
         //   done = true;
