@@ -12,7 +12,6 @@ This project is developed by:
 
 1. **PlanSys2:**    - [PlanSys2 GitHub Repository](https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel)
 
-<!-- 1. **PlanSys2-Action Server:**    - [PlanSys2-Action Server GitHub Repository](https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel) -->
 
 2. **Slam Toolbox** - [Slam Toolbox Github Repository](https://github.com/SteveMacenski/slam_toolbox/tree/humble)
 
@@ -20,7 +19,6 @@ This project is developed by:
 
 4. **Aruco:**  - [OpenCV Aruco Marker Tracking GitHub Repository](https://github.com/carmineD8/ros2_aruco)
 
-<!-- 4. **ROSbot:**   - [Rosbot GitHub Repository](https://github.com/husarion/rosbot_ros.git) (noetic)  -->
 
 ## Installation
 docker-compose.yaml file is going to be used to build the environment. 
@@ -43,10 +41,6 @@ git clone https://github.com/SteveMacenski/slam_toolbox/tree/humble
 git clone https://github.com/carmineD8/ros2_aruco
 git clone https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel
 ```
-<!-- Remove some folders to prevent conflicts  
-```
-rm -rf ros2_planning_system_examples/plansys2_patrol_navigation_example
-``` -->
 
 - Build container with the yaml file inside folder that you created(docker)
 ```
