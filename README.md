@@ -1,26 +1,87 @@
-# ERL-assignment2-ROS-PLANNING-AND-SLAM
+# Experimental Robotics Laboratory - Assignment 2 ROS PLANNING AND SLAM
 
-This is exp-robotics assignment 2-
-nno, THISIS MINE
+In this project a mobile robot is planned to visit 4 waypoints in the Gazebo world, And goes to the waypoint with the Aruco-marker that has smallest id. It uses PlanSys2 for planning, Navigation2 for navigation, and detection of Aruco markers using the ros2 Aruco library. 
 
-apt-get update 
-apt install ros-humble-xacro 
-apt install ros-humble-joint-state-publisher 
-apt install ros-humble-gazebo-ros2-control
-sudo apt-get install ros-humble-rviz2 
-sudo apt install ros-humble-gazebo-ros-pkgs
-sudo apt install '~nros-humble-rqt*'
+This project is developed by:
+1. *Mehdi Raza Khorasani - s6164555*
+2. *Ouassim Milous - s5938924*
+3. *Younes Hebik - s5813030*
+4. *Ozan Pali - s5831146*
 
-sudo apt-get install ros-humble-plansys2-domain-expert
-sudo apt install ros-humble-gtest-vendor
-sudo apt install ros-humble-rqt-gui-cpp
-sudo apt install ros-humble-rclcpp-cascade-lifecycle
-sudo apt install ros-humble-behaviortree-cpp-v3
-sudo apt install ros-humble-test-msgs
-sudo apt install libreadline-dev
-sudo apt install ros-humble-nav2-msgs
+## Dependencies
 
-sudo apt-get install ros-humble-behaviortree-cpp
-apt-get install ros-humble-plansys2-pddl-parser
+1. **PlanSys2:**    - [PlanSys2 GitHub Repository](https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel)
 
-sudo apt install libsuitesparse-dev
+<!-- 1. **PlanSys2-Action Server:**    - [PlanSys2-Action Server GitHub Repository](https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel) -->
+
+2. **Slam Toolbox** - [Slam Toolbox Github Repository](https://github.com/SteveMacenski/slam_toolbox/tree/humble)
+
+3. **Navigation2**  - [Navigation2 Github Repository](https://github.com/ros-navigation/navigation2/tree/humble)
+
+4. **Aruco:**  - [OpenCV Aruco Marker Tracking GitHub Repository](https://github.com/carmineD8/ros2_aruco)
+
+<!-- 4. **ROSbot:**   - [Rosbot GitHub Repository](https://github.com/husarion/rosbot_ros.git) (noetic)  -->
+
+## Installation
+docker-compose.yaml file is going to be used to build the environment. 
+
+
+- First of all create a folder in your local machine to be mounted inside docker container
+```
+mkdir docker
+```
+- Create the workspace for the project 
+```
+cd docker
+mkdir -r ros_ws/src
+cd ros_ws/src
+```
+- Clone the packages required for the project inside src folder
+```
+git clone https://github.com/OuassimMilous/ERL-assignment2-ROS-PLANNING-AND-SLAM
+git clone https://github.com/SteveMacenski/slam_toolbox/tree/humble
+git clone https://github.com/carmineD8/ros2_aruco
+git clone https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel
+```
+<!-- Remove some folders to prevent conflicts  
+```
+rm -rf ros2_planning_system_examples/plansys2_patrol_navigation_example
+``` -->
+
+- Build container with the yaml file inside folder that you created(docker)
+```
+mv /ERL-assignment2-ROS-PLANNING-AND-SLAM/docker-compose.yaml ../../../
+mv /ERL-assignment2-ROS-PLANNING-AND-SLAM/env-setup.sh ../../../
+cd ../../../
+docker compose up -d
+```
+- Start the container and do the next instructions inside container
+```
+docker exec -it exp-assignment-2 bash
+```
+- Install the navigation package with apt
+```
+apt update
+cd /data
+chmod +x env-setup.sh
+./env-setup.sh
+```
+
+- Install the dependencies of the packages and build your workspace
+```
+cd /data/ros_ws
+colcon build
+```
+
+## Running the project
+
+- In the first terminal: Source your workspace and launch the required python file
+```
+ros2 launch autonomous_planner paunch_launch.py
+```
+- In the new terminal: Source your workspace and start the action server node
+```
+ros2 run autonomous_planner patrolling_controller_node 
+```
+Note: For the move action and the controller node were inspired by ros2_planning_system_examples repository of PlanSys2 [Click  to see utilized part](https://github.com/PlanSys2/ros2_planning_system_examples/tree/humble/plansys2_patrol_navigation_example/src)   
+
