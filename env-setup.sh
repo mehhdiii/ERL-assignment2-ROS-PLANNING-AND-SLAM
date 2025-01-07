@@ -21,5 +21,7 @@ sudo apt-get install ros-humble-rviz2 &&
 sudo apt install ros-humble-gazebo-ros-pkgs &&
 cp -r /data/data/aruco_ros/aruco_ros/models /root/.gazebo/models &&
 sudo apt install '~nros-humble-rqt*' &&
-echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc 
+echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc &&
+echo 'source /data/ros_ws/install/setup.bash' >> ~/.bashrc &&
+
 # bash -c "echo 'hello world' r > /tmp/hello.txt"
