@@ -64,22 +64,53 @@
                 <center>0.5 0.5</center>
             </distortion>
         </camera>
-        <plugin name="plugin_name" filename="libgazebo_ros_camera.so">
+        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
                 <remapping>~/image_raw:=image_raw</remapping>
                 <remapping>~/camera_info:=camera_info</remapping>
             </ros>
             <camera_name>camera</camera_name>
             <frame_name>camera_link</frame_name>
+            <!-- <updateRate>0.0</updateRate>
+            <alwaysOn>true</alwaysOn>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2> -->
+
         </plugin>
+
     </sensor>
 </gazebo>
 
+<!-- <gazebo reference="camera_joint">
+    <plugin name="camera_velocity_controller" filename="libgazebo_ros_joint_velocity_controller.so">
+        <joint_name>camera_joint</joint_name>
+        <command_topic>robot/camera_cmd</command_topic>
+        <update_rate>0.0</update_rate>
+    </plugin>
+</gazebo> -->
 
 
+<gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros2_control.so">
+        <parameters>$(find robot_urdf)/config/camera_config.yaml</parameters>
+    </plugin>
+</gazebo>
 
-
-
+<!-- <transmission>
+    <type>
+    transmission_interface/SimpleTransmission
+    </type>
+    <actuator>
+        <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="camera_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+</transmission> -->
 
 <gazebo reference="laser_link">
     <sensor name="sensor_ray" type="ray">

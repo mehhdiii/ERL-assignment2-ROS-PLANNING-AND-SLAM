@@ -1,5 +1,6 @@
 slam_toolbox:
   ros__parameters:
+    queue_size: 100  # Increase the queue size to 100
 
     # Plugin params
     solver_plugin: solver_plugins::CeresSolver
@@ -20,9 +21,9 @@ slam_toolbox:
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
     # will use pose
-    #map_file_name: test_steve
+    map_file_name: /data/ros_ws/src/autonomous-planner-pkgs/autonomous_planner/configs/mymap # replace with your map file path!
     #map_start_pose: [0.0, 0.0, 0.0]
-    #map_start_at_dock: true
+    map_start_at_dock: true
 
     debug_logging: false
     throttle_scans: 1

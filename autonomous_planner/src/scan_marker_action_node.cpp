@@ -13,6 +13,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
+#include "std_msgs/msg/float64_multi_array.hpp"
+
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -41,7 +43,7 @@ public:
 
     progress_ = 0.0;
 
-    cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    cmd_vel_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("joint_velocity_controller/commands", 10);
     cmd_vel_pub_->on_activate();
 
     current_target_wp = get_arguments()[1];  // The goal is in the 2nd argument of the action
@@ -87,15 +89,12 @@ private:
   // SUBSCRIBER: SYSPLAN ACTION
   void do_work()
   {
-    geometry_msgs::msg::Twist cmd;
-      cmd.linear.x = 0.0;
-      cmd.linear.y = 0.0;
-      cmd.linear.z = 0.0;
-      cmd.angular.x = 0.0;
-      cmd.angular.y = 0.0;
-      cmd.angular.z = 1.0;
+    // finish(true, 1.0, "SCAN FORCED TO FINISH");
 
-      cmd_vel_pub_->publish(cmd); 
+    std_msgs::msg::Float64MultiArray commands;
+    commands.data.push_back(0.1);
+
+    cmd_vel_pub_->publish(commands); 
     RCLCPP_INFO(rclcpp::get_logger("scan action node"), "scanning...");
 
     if (last_id != 0 && arucos_map.find(last_id) == arucos_map.end()) {
@@ -104,15 +103,8 @@ private:
       RCLCPP_INFO(rclcpp::get_logger("Found marker"), "MARKER FOUND! marker_sid: %d", last_id);
       RCLCPP_INFO(rclcpp::get_logger("Marker location"), "MARKER FOUND at: %s", current_target_wp.c_str());
 
-      geometry_msgs::msg::Twist cmd;
-      cmd.linear.x = 0.0;
-      cmd.linear.y = 0.0;
-      cmd.linear.z = 0.0;
-      cmd.angular.x = 0.0;
-      cmd.angular.y = 0.0;
-      cmd.angular.z = 0.0;
-
-      cmd_vel_pub_->publish(cmd);
+      commands.data[0] = 0;
+      cmd_vel_pub_->publish(commands);
 
       finish(true, 1.0, "MARKER FOUND! Scanning marker completed");
 
@@ -121,7 +113,7 @@ private:
     send_feedback(progress_, "Scan Marker running");
   }
 
-    rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+    rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64MultiArray>::SharedPtr cmd_vel_pub_;
   float progress_ = 0.0; // 0 MEANS NO MARKER FOUND; 1 MEANS MARKER FOUND
     // SERVICE: GET SMALLEST ARUCO POSE
 
