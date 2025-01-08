@@ -92,7 +92,7 @@ private:
     // finish(true, 1.0, "SCAN FORCED TO FINISH");
 
     std_msgs::msg::Float64MultiArray commands;
-    commands.data.push_back(0.1);
+    commands.data.push_back(0.4);
 
     cmd_vel_pub_->publish(commands); 
     RCLCPP_INFO(rclcpp::get_logger("scan action node"), "scanning...");

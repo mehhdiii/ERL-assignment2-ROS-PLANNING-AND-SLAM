@@ -72,29 +72,12 @@ public:
     problem_expert_->addInstance(plansys2::Instance{"wp2", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp3", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp4", "waypoint"});
-
-    // problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_control)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp1))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp2))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp3))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited wp4))"));
-
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp4))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp2))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp3))"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(not (visited_and_scanned wp4))"));
+    problem_expert_->addInstance(plansys2::Instance{"wpf", "waypoint"});
 
 
     problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_control)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp1)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp1 wp_control)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp2)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp2 wp_control)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp3)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp3 wp_control)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp_control wp4)"));
-    // problem_expert_->addPredicate(plansys2::Predicate("(connected wp4 wp_control)"));
-  }
+
+}
 
   void step()
   {
@@ -156,7 +139,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP2;
+                state_ = PATROL_WP4;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -305,31 +288,31 @@ public:
         break;
       case PATROL_WP4:
         {
-          rclcpp::Client<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr client =this->create_client<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco_client");
+          // rclcpp::Client<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr client =this->create_client<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco_client");
 
-          auto request = std::make_shared<autonomous_planner_interfaces::srv::GetLastMarker::Request>();
-
-
-          while (!client->wait_for_service(1s)) {
-            if (!rclcpp::ok()) {
-              RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-              return;
-            }
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
-          }
+          // auto request = std::make_shared<autonomous_planner_interfaces::srv::GetLastMarker::Request>();
 
 
+          // while (!client->wait_for_service(1s)) {
+          //   if (!rclcpp::ok()) {
+          //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+          //     return;
+          //   }
+          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
+          // }
 
-          auto result = client->async_send_request(request);
-          // Wait for the result.
-          if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-            rclcpp::FutureReturnCode::SUCCESS)
-          {
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco id found!: %d", result.get()->marker_id);
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco wp found!: %s", result.get()->waypoint.c_str());
-          } else {
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service get_smallest_aruco");
-          }
+
+
+          // auto result = client->async_send_request(request);
+          // // Wait for the result.
+          // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+          //   rclcpp::FutureReturnCode::SUCCESS)
+          // {
+          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco id found!: %d", result.get()->marker_id);
+          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco wp found!: %s", result.get()->waypoint.c_str());
+          // } else {
+          //   RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service get_smallest_aruco");
+          // }
 
 
           // // Define your location
@@ -362,7 +345,8 @@ public:
           // // Output the result
           // std::cout << "The closest location is " << WPFINAL << " with a distance of " << smallestDistance << std::endl;
 
-          const char* WPFINAL = result.get()->waypoint.c_str();
+          // const char* WPFINAL = result.get()->waypoint.c_str();
+          const char* WPFINAL = "wpf";
 
 
           auto feedback = executor_client_->getFeedBack();
@@ -381,7 +365,7 @@ public:
               // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp4)"));
               // Set the goal for next state
               // problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp%d))")lastwp);
-              std::string goal = std::string("(and(visited_and_scanned ") + WPFINAL + "))";
+              std::string goal = std::string("(and(visited wpf))");
               std::cout << "Goal: " << goal << std::endl;
 
               problem_expert_->setGoal(plansys2::Goal(goal));
