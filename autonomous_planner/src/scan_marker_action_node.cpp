@@ -15,6 +15,7 @@
 #include "lifecycle_msgs/msg/state.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
+#include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -30,9 +31,10 @@ public:
   ScanMarker()
       : plansys2::ActionExecutorClient("scan_marker", 1s)
   {
-    service =
-        this->create_service<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco", std::bind(&ScanMarker::get_smallest_aruco_callback, this, std::placeholders::_1, std::placeholders::_2));
 
+        smallest_wp_publisher_ = this->create_publisher<std_msgs::msg::String>("smallest_wp_topic", 10);
+
+  
   }
 
 
@@ -92,7 +94,7 @@ private:
     // finish(true, 1.0, "SCAN FORCED TO FINISH");
 
     std_msgs::msg::Float64MultiArray commands;
-    commands.data.push_back(0.1);
+    commands.data.push_back(0.4);
 
     cmd_vel_pub_->publish(commands); 
     RCLCPP_INFO(rclcpp::get_logger("scan action node"), "scanning...");
@@ -106,33 +108,42 @@ private:
       commands.data[0] = 0;
       cmd_vel_pub_->publish(commands);
 
+      // Publish the waypoint name to the topic
+      std_msgs::msg::String waypoint_msg;
+      waypoint_msg.data = current_target_wp;
+
       finish(true, 1.0, "MARKER FOUND! Scanning marker completed");
 
 
     }
     send_feedback(progress_, "Scan Marker running");
+
+
+
+    if (!arucos_map.empty()) {
+      int smallest_last_id = arucos_map.begin()->first;
+      std::string smallest_wp = arucos_map.begin()->second;
+
+      // Log the smallest id and waypoint (for debugging)
+      RCLCPP_INFO(this->get_logger(), "smallest_id: %d", smallest_last_id);
+      RCLCPP_INFO(this->get_logger(), "smallest_wp: %s", smallest_wp.c_str());
+
+      // Publish the waypoint (smallest_wp) on the topic
+      auto msg = std_msgs::msg::String();
+      msg.data = smallest_wp;
+      smallest_wp_publisher_->publish(msg);
+
+      // Log the message published
+      RCLCPP_INFO(this->get_logger(), "Published: '%s'", smallest_wp.c_str());
+    } 
+      
   }
 
     rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64MultiArray>::SharedPtr cmd_vel_pub_;
+      rclcpp::Publisher<std_msgs::msg::String>::SharedPtr smallest_wp_publisher_;
+
   float progress_ = 0.0; // 0 MEANS NO MARKER FOUND; 1 MEANS MARKER FOUND
-    // SERVICE: GET SMALLEST ARUCO POSE
 
-  void get_smallest_aruco_callback(const std::shared_ptr<autonomous_planner_interfaces::srv::GetLastMarker::Request> request,
-                                   std::shared_ptr<autonomous_planner_interfaces::srv::GetLastMarker::Response> response)
-  {
-    (void)request;
-    RCLCPP_INFO(rclcpp::get_logger("get_smallest_aruco Service"), "Incoming service request");
-
-
-    int smallest_last_id = arucos_map.begin()->first;
-    std::string smallest_wp = arucos_map.begin()->second;
-
-    RCLCPP_INFO(rclcpp::get_logger("get_smallest_aruco Service"), "smallest_id: %d", smallest_last_id);
-    RCLCPP_INFO(rclcpp::get_logger("get_smallest_aruco Service"), "smallest_wp: %s", smallest_wp.c_str());
-
-    response->marker_id = smallest_last_id;
-    response->waypoint = smallest_wp;
-  }
 };
 
 int main(int argc, char **argv)

@@ -94,7 +94,7 @@ def generate_launch_description():
         nav2_bringup_launch,
         plansys2_launch,
         # fake_nav2_node,
-        move_action_node,
+        # move_action_node,
         scan_action_node,
         aruco_node
     ])

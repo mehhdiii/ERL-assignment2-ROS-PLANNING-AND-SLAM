@@ -31,6 +31,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+#include "autonomous_planner_interfaces/srv/get_last_marker.hpp"
+#include "std_msgs/msg/string.hpp"
+
+using GetLastMarker = autonomous_planner_interfaces::srv::GetLastMarker;
 using namespace std::chrono_literals;
 double tolerance=0.5;
 class MoveAction : public plansys2::ActionExecutorClient
@@ -69,11 +73,26 @@ public:
       "/amcl_pose",
       10,
       std::bind(&MoveAction::current_pos_callback, this, _1));
+    
+    navigation_action_client_ =
+      rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
+      this,
+      "navigate_to_pose");
+
+    smallest_wp_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+      "smallest_wp_topic", 10, std::bind(&MoveAction::topic_callback, this, std::placeholders::_1));
+
   }
 
   void current_pos_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
   {
     current_pos_ = msg->pose.pose;
+  }
+
+  void marker_callback(const std_msgs::msg::String::SharedPtr msg)
+  {
+    smallest_wp = msg->data;
+    RCLCPP_INFO(get_logger(), "Received waypoint: %s", smallest_wp.c_str());
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -83,11 +102,6 @@ public:
     RCLCPP_INFO(get_logger(), "on_activate");
 
     send_feedback(0.0, "Move starting");
-
-    navigation_action_client_ =
-      rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
-      shared_from_this(),
-      "navigate_to_pose");
 
     bool is_action_server_ready = false;
     do {
@@ -99,8 +113,15 @@ public:
 
     RCLCPP_INFO(get_logger(), "Navigation action server ready");
 
-    auto wp_to_navigate = get_arguments()[2];  // The goal is in the 3rd argument of the action
+    std::string wp_to_navigate = get_arguments()[2] ;  // The goal is in the 3rd argument of the action
+   
     RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
+
+    if (wp_to_navigate == "wpf") {
+      RCLCPP_INFO(get_logger(), "inside wpf if statement");
+      wp_to_navigate = smallest_wp;
+      RCLCPP_INFO(get_logger(), "Received waypoint from topic: %s", wp_to_navigate.c_str());
+    }
 
     goal_pos_ = waypoints_[wp_to_navigate];
     navigation_goal_.pose = goal_pos_;
@@ -114,22 +135,13 @@ public:
     send_goal_options.feedback_callback = [this](
       NavigationGoalHandle::SharedPtr,
       NavigationFeedback feedback) {
-          // RCLCPP_INFO(get_logger(), "fi wst send goal callback");
-
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
 
-          progress= std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move)));
-          progress_f=1-progress;
-        //   // Check if within tolerance
-        // if (feedback->distance_remaining <= tolerance_) {
-        //   done = true;
-        // }
-
-
+        progress= std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move)));
+        progress_f=1-progress;
       };
-      
 
     send_goal_options.result_callback = [this](auto) {
         finish(true, 1.0, "Move completed");
@@ -138,16 +150,25 @@ public:
     future_navigation_goal_handle_ =
       navigation_action_client_->async_send_goal(navigation_goal_, send_goal_options);
 
-    return ActionExecutorClient::on_activate(previous_state);
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
-  
 
 private:
-  // double tolerance_ = 0.05;  // Define a tolerance for reaching the goal
-//  bool done=false;
+
+  std::string smallest_wp;
+  void topic_callback(const std_msgs::msg::String::SharedPtr msg)
+  {
+    smallest_wp = msg->data.c_str();
+    // Log the received waypoint message
+    RCLCPP_INFO(this->get_logger(), "Received waypoint: '%s'", smallest_wp);
+  }
+
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr smallest_wp_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr marker_sub_;
+
+
   double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
   {
-
     return sqrt(
       (pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
       (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
@@ -157,7 +178,7 @@ private:
   double progress_f;
   bool done=((progress_f)<tolerance);
    
-   void do_work()
+  void do_work()
   {
         
   }
