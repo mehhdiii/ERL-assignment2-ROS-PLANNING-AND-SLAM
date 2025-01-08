@@ -32,6 +32,7 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 
 #include "autonomous_planner_interfaces/srv/get_last_marker.hpp"
+#include "std_msgs/msg/string.hpp"
 
 using GetLastMarker = autonomous_planner_interfaces::srv::GetLastMarker;
 using namespace std::chrono_literals;
@@ -72,18 +73,26 @@ public:
       "/amcl_pose",
       10,
       std::bind(&MoveAction::current_pos_callback, this, _1));
-    get_last_marker_client_ = this->create_client<GetLastMarker>("get_smallest_aruco");
     
     navigation_action_client_ =
       rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
       this,
       "navigate_to_pose");
 
+    smallest_wp_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+      "smallest_wp_topic", 10, std::bind(&MoveAction::topic_callback, this, std::placeholders::_1));
+
   }
 
   void current_pos_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
   {
     current_pos_ = msg->pose.pose;
+  }
+
+  void marker_callback(const std_msgs::msg::String::SharedPtr msg)
+  {
+    smallest_wp = msg->data;
+    RCLCPP_INFO(get_logger(), "Received waypoint: %s", smallest_wp.c_str());
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -93,8 +102,6 @@ public:
     RCLCPP_INFO(get_logger(), "on_activate");
 
     send_feedback(0.0, "Move starting");
-
-
 
     bool is_action_server_ready = false;
     do {
@@ -106,71 +113,15 @@ public:
 
     RCLCPP_INFO(get_logger(), "Navigation action server ready");
 
-
     std::string wp_to_navigate = get_arguments()[2] ;  // The goal is in the 3rd argument of the action
    
-    // auto wp_to_navigate = get_arguments()[2];  // The goal is in the 3rd argument of the action
     RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
 
-  if (wp_to_navigate == "wpf") {
-     RCLCPP_INFO(get_logger(), "inside wpf if statement");
-    // Call the service to get the smallest ArUco marker
-    auto request = std::make_shared<autonomous_planner_interfaces::srv::GetLastMarker::Request>();
-    RCLCPP_INFO(get_logger(), "request created");
-    while (!get_last_marker_client_->wait_for_service(10s)) {
-      RCLCPP_WARN(get_logger(), "Waiting for the get_smallest_aruco service to be available...");
+    if (wp_to_navigate == "wpf") {
+      RCLCPP_INFO(get_logger(), "inside wpf if statement");
+      wp_to_navigate = smallest_wp;
+      RCLCPP_INFO(get_logger(), "Received waypoint from topic: %s", wp_to_navigate.c_str());
     }
-    RCLCPP_INFO(get_logger(), "service available");
-    auto result_future = get_last_marker_client_->async_send_request(request);
-      RCLCPP_INFO(get_logger(), "after result_future");
-
-      // auto temp_node = std::make_shared<rclcpp::Node>("temporary_node");
-
-      // if (rclcpp::spin_until_future_complete(temp_node, result_future) ==
-      //     rclcpp::FutureReturnCode::SUCCESS)
-      // {
-      //   RCLCPP_INFO(get_logger(), "succeeded to call get_smallest_aruco service");
-      //   auto response = result_future.get();
-      //   RCLCPP_INFO(get_logger(), "got response");
-      //   // RCLCPP_INFO(get_logger(), "Received marker_id: %d, waypoint: %s",
-      //   //             response->marker_id, response->waypoint.c_str());
-      //   wp_to_navigate = response->waypoint.c_str();
-      //   RCLCPP_INFO(get_logger(), "saved response to wp_to_navigate");
-      // }
-      // else
-      // {
-      //           RCLCPP_INFO(get_logger(), "error occured in get_smallest_aruco service");
-
-      //   RCLCPP_ERROR(get_logger(), "Failed to call get_smallest_aruco service");
-      // }
-      // while (rclcpp::ok() && result_future.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
-      // {
-      //   rclcpp_lifecycle::LifecycleNode::spin_some(get_node_base_interface());
-      //   RCLCPP_INFO(get_logger(), "waiting in while loop");
-
-      // }
-      // result_future.wait_for(std::chrono::seconds(5));
-      auto status = result_future.wait_for(std::chrono::seconds(10)); // Increase timeout duration
-
-      if (status == std::future_status::ready) {
-        auto response = result_future.get();
-        RCLCPP_INFO(get_logger(), "Received marker_id: %d, waypoint: %s",
-                    response->marker_id, response->waypoint.c_str());
-        wp_to_navigate = response->waypoint;
-        RCLCPP_INFO(get_logger(), "parsed response %s", wp_to_navigate.c_str());
-      } else if (status == std::future_status::timeout) {
-        RCLCPP_WARN(get_logger(), "Timeout while waiting for the get_smallest_aruco service response");
-      } else if (status == std::future_status::deferred) {
-        RCLCPP_WARN(get_logger(), "The get_smallest_aruco service task is deferred");
-      }
-      // RCLCPP_INFO(get_logger(), "getting value");
-      // std::shared_ptr<autonomous_planner_interfaces::srv::GetLastMarker::Response> response = result_future.get();
-      
-      RCLCPP_INFO(get_logger(), "fetched!");
-      // wp_to_navigate = response->waypoint.c_str();
-      RCLCPP_INFO(get_logger(), "parsed response %s", wp_to_navigate);
-
-  }
 
     goal_pos_ = waypoints_[wp_to_navigate];
     navigation_goal_.pose = goal_pos_;
@@ -184,22 +135,13 @@ public:
     send_goal_options.feedback_callback = [this](
       NavigationGoalHandle::SharedPtr,
       NavigationFeedback feedback) {
-          // RCLCPP_INFO(get_logger(), "fi wst send goal callback");
-
         send_feedback(
           std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
           "Move running");
 
-          progress= std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move)));
-          progress_f=1-progress;
-        //   // Check if within tolerance
-        // if (feedback->distance_remaining <= tolerance_) {
-        //   done = true;
-        // }
-
-
+        progress= std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move)));
+        progress_f=1-progress;
       };
-      
 
     send_goal_options.result_callback = [this](auto) {
         finish(true, 1.0, "Move completed");
@@ -210,15 +152,23 @@ public:
 
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
-  
 
 private:
 
-  rclcpp::Client<GetLastMarker>::SharedPtr get_last_marker_client_;
+  std::string smallest_wp;
+  void topic_callback(const std_msgs::msg::String::SharedPtr msg)
+  {
+    smallest_wp = msg->data.c_str();
+    // Log the received waypoint message
+    RCLCPP_INFO(this->get_logger(), "Received waypoint: '%s'", smallest_wp);
+  }
+
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr smallest_wp_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr marker_sub_;
+
 
   double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
   {
-
     return sqrt(
       (pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
       (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
@@ -228,7 +178,7 @@ private:
   double progress_f;
   bool done=((progress_f)<tolerance);
    
-   void do_work()
+  void do_work()
   {
         
   }

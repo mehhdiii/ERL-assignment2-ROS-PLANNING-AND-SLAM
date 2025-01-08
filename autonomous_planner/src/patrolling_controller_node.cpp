@@ -45,7 +45,6 @@ using namespace std::chrono_literals;
 // }
 
 
-const std::string WPFINAL = "waypoint_final";
 
 class PatrollingController : public rclcpp::Node
 {
@@ -139,7 +138,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP4;
+                state_ = PATROL_WP2;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
