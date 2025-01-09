@@ -53,27 +53,11 @@ def generate_launch_description():
         name='aruco_node',
         output='screen'
     )
-    # Nodes
-    fake_nav2_node = Node(
-        package='plansys2_bt_example',
-        executable='nav2_sim_node',
-        name='nav2_sim_node',
-        output='screen',
-        parameters=[]
-    )
 
     move_action_node = Node(
         package='autonomous_planner',
         executable='move_action_node',
         name='move_action_node',
-        output='screen',
-        parameters=[]
-    )
-
-    patrol_action_node = Node(
-        package='autonomous_planner',
-        executable='patrol_action_node',
-        name='patrol_action_node',
         output='screen',
         parameters=[]
     )
@@ -94,7 +78,7 @@ def generate_launch_description():
         nav2_bringup_launch,
         plansys2_launch,
         # fake_nav2_node,
-        # move_action_node,
+        move_action_node,
         scan_action_node,
         aruco_node
     ])
