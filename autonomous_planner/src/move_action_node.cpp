@@ -66,7 +66,7 @@ public:
 
     wp.pose.position.x = 2.0;
     wp.pose.position.y = 2.0;
-    waypoints_["wp_control"] = wp;
+    waypoints_["wp_init"] = wp;
 
     using namespace std::placeholders;
     pos_sub_ = create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(

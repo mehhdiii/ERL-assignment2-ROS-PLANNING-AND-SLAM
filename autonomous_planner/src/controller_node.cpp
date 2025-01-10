@@ -33,24 +33,11 @@ using namespace std::chrono_literals;
 #include "autonomous_planner_interfaces/srv/get_last_marker.hpp"
 
 
-
-// struct Point {
-//     double x;
-//     double y;
-// };
-
-// // Function to calculate the Euclidean distance between two points
-// double calculateDistance(const Point& p1, const Point& p2) {
-//     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
-// }
-
-
-
-class PatrollingController : public rclcpp::Node
+class ControllerNode : public rclcpp::Node
 {
 public:
-  PatrollingController()
-  : rclcpp::Node("patrolling_controller"), state_(STARTING)
+  ControllerNode()
+  : rclcpp::Node("controller_node"), state_(STARTING)
   {
   }
 
@@ -66,7 +53,7 @@ public:
   void init_knowledge()
   {
     problem_expert_->addInstance(plansys2::Instance{"robot1", "robot"});
-    problem_expert_->addInstance(plansys2::Instance{"wp_control", "waypoint"});
+    problem_expert_->addInstance(plansys2::Instance{"wp_init", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp1", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp2", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp3", "waypoint"});
@@ -74,7 +61,7 @@ public:
     problem_expert_->addInstance(plansys2::Instance{"wpf", "waypoint"});
 
 
-    problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_control)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at robot1 wp_init)"));
 
 }
 
@@ -96,16 +83,14 @@ public:
               parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
             break;
           }
-          std::cout << "A STUPID LOOP " <<std::endl;
 
           // Execute the plan
           if (executor_client_->start_plan_execution(plan.value())) {
-            state_ = PATROL_WP1;
-            std::cout << "DAUNE " <<std::endl;
+            state_ = WP1;
           }
         }
         break;
-      case PATROL_WP1:
+      case WP1:
         {
           auto feedback = executor_client_->getFeedBack();
 
@@ -117,10 +102,6 @@ public:
 
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
-              std::cout << "Successful finished " << std::endl;
-
-              // Cleanning up
-              // problem_expert_->removePredicate(plansys2::Predicate("(visited_and_scanned wp1)"));
 
               // Set the goal for next state
               problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp2))"));
@@ -138,7 +119,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP2;
+                state_ = WP2;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -165,7 +146,7 @@ public:
           }
         }
         break;
-      case PATROL_WP2:
+      case WP2:
         {
           auto feedback = executor_client_->getFeedBack();
 
@@ -178,9 +159,6 @@ public:
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
-
-              // // Cleanning up
-              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp2)"));
 
               // Set the goal for next state
               problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp3))"));
@@ -198,7 +176,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP3;
+                state_ = WP3;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -225,7 +203,7 @@ public:
           }
         }
         break;
-      case PATROL_WP3:
+      case WP3:
         {
           auto feedback = executor_client_->getFeedBack();
 
@@ -239,9 +217,7 @@ public:
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
-              // // Cleanning up
-              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp3)"));
-
+        
               // Set the goal for next state
               problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp4))"));
 
@@ -258,7 +234,7 @@ public:
 
               // Execute the plan
               if (executor_client_->start_plan_execution(plan.value())) {
-                state_ = PATROL_WP4;
+                state_ = WP4;
               }
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
@@ -285,69 +261,9 @@ public:
           }
         }
         break;
-      case PATROL_WP4:
+      case WP4:
         {
-          // rclcpp::Client<autonomous_planner_interfaces::srv::GetLastMarker>::SharedPtr client =this->create_client<autonomous_planner_interfaces::srv::GetLastMarker>("get_smallest_aruco_client");
-
-          // auto request = std::make_shared<autonomous_planner_interfaces::srv::GetLastMarker::Request>();
-
-
-          // while (!client->wait_for_service(1s)) {
-          //   if (!rclcpp::ok()) {
-          //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
-          //     return;
-          //   }
-          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
-          // }
-
-
-
-          // auto result = client->async_send_request(request);
-          // // Wait for the result.
-          // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-          //   rclcpp::FutureReturnCode::SUCCESS)
-          // {
-          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco id found!: %d", result.get()->marker_id);
-          //   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "smallest aruco wp found!: %s", result.get()->waypoint.c_str());
-          // } else {
-          //   RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service get_smallest_aruco");
-          // }
-
-
-          // // Define your location
-          // Point myLocation = {result.get()->x, result.get()->y};
-
-          // // Define the four other locations
-          // Point wp1 = {5.62, 1.76};
-          // Point wp2 = {6.97, -5.12};
-          // Point wp3 = {-2.73, -7.88};
-          // Point wp4 = {-7.03, 1.28};
-
-          // // Create an array of locations
-          // Point locations[] = {wp1, wp2, wp3, wp4};
-
-          // // Array of waypoint names
-          // const char* waypointNames[] = {"wp1", "wp2", "wp3", "wp4"};
-
-          // double smallestDistance = std::numeric_limits<double>::max();
-          // const char* WPFINAL = nullptr;
-
-          // // Calculate the distance to each location
-          // for (int i = 0; i < 4; ++i) {
-          //     double distance = calculateDistance(myLocation, locations[i]);
-          //     if (distance < smallestDistance) {
-          //         smallestDistance = distance;
-          //         WPFINAL = waypointNames[i];
-          //     }
-          // }
-
-          // // Output the result
-          // std::cout << "The closest location is " << WPFINAL << " with a distance of " << smallestDistance << std::endl;
-
-          // const char* WPFINAL = result.get()->waypoint.c_str();
-          const char* WPFINAL = "wpf";
-
-
+       
           auto feedback = executor_client_->getFeedBack();
 
           for (const auto & action_feedback : feedback.action_execution_status) {
@@ -359,11 +275,7 @@ public:
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
-
-              // // Cleanning up
-              // problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp4)"));
-              // Set the goal for next state
-              // problem_expert_->setGoal(plansys2::Goal("(and(visited_and_scanned wp%d))")lastwp);
+        
               std::string goal = std::string("(and(visited wpf))");
               std::cout << "Goal: " << goal << std::endl;
 
@@ -417,7 +329,7 @@ public:
   }
 
 private:
-  typedef enum {STARTING, PATROL_WP1, PATROL_WP2, PATROL_WP3, PATROL_WP4, ENDING} StateType;
+  typedef enum {STARTING, WP1, WP2, WP3, WP4, ENDING} StateType;
   StateType state_;
 
   std::shared_ptr<plansys2::DomainExpertClient> domain_expert_;
@@ -429,7 +341,7 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<PatrollingController>();
+  auto node = std::make_shared<ControllerNode>();
 
   node->init();
 
