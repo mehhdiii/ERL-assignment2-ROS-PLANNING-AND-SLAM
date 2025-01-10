@@ -71,11 +71,11 @@ colcon build
 
 - In the first terminal: Source your workspace and launch the required python file
 ```
-ros2 launch autonomous_planner paunch_launch.py
+ros2 launch autonomous_planner assignement2_launch.py
 ```
 - In the new terminal: Source your workspace and start the action server node
 ```
-ros2 run autonomous_planner patrolling_controller_node 
+ros2 run autonomous_planner controller_node 
 ```
 Note: For the move action and the controller node were inspired by ros2_planning_system_examples repository of PlanSys2 [Click  to see utilized part](https://github.com/PlanSys2/ros2_planning_system_examples/tree/humble/plansys2_patrol_navigation_example/src)   
 

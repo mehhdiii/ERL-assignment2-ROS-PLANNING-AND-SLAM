@@ -41,32 +41,24 @@ set(dependencies
 add_executable(move_action_node src/move_action_node.cpp)
 ament_target_dependencies(move_action_node ${dependencies})
 
-add_executable(patrol_action_node src/patrol_action_node.cpp)
-ament_target_dependencies(patrol_action_node ${dependencies})
-
 
 add_executable(scan_marker_action_node src/scan_marker_action_node.cpp)
 ament_target_dependencies(scan_marker_action_node ${dependencies})
 
-add_executable(patrolling_controller_node src/patrolling_controller_node.cpp)
-ament_target_dependencies(patrolling_controller_node ${dependencies})
+add_executable(controller_node src/controller_node.cpp)
+ament_target_dependencies(controller_node ${dependencies})
 
 install(DIRECTORY launch pddl params DESTINATION share/${PROJECT_NAME})
 
 
 install(TARGETS
   move_action_node
-  patrol_action_node
   scan_marker_action_node
-  patrolling_controller_node
+  controller_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
-
-
-
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

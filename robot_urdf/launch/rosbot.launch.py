@@ -5,18 +5,21 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch.event_handlers import OnProcessStart
+from launch.event_handlers import OnProcessExit
+
 from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
     test_robot_description_share = FindPackageShare(package='robot_urdf').find('robot_urdf')
-    default_model_path = os.path.join(test_robot_description_share, 'urdf/robot4.xacro')
-    default_world_path = os.path.join(test_robot_description_share, 'worlds/aruco_test.world')
-    rviz_config_path = os.path.join(test_robot_description_share, 'config/rviz.rviz')
+    default_model_path = os.path.join(test_robot_description_share, 'urdf/rosbot.xacro')
+    rviz_config_path = os.path.join(test_robot_description_share, 'config/rviz_slam_cam_aruco.rviz')
+    default_world_path = os.path.join(test_robot_description_share, 'worlds/assignment2.world')
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -27,18 +30,30 @@ def generate_launch_description():
     joint_state_publisher_node = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
-        name='joint_state_publisher'
+        name='joint_state_publisher',
     )
    
 
     # GAZEBO_MODEL_PATH has to be correctly set for Gazebo to be able to find the model
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'my_test_robot', '-topic', '/robot_description', '-Y', '3.14'],
+                        arguments=['-entity', 'my_test_robot', '-topic', '/robot_description', '-x', '2.0', '-y', '2.0'],
                         output='screen')
+    
+    camera_config_path = os.path.join(get_package_share_directory('robot_urdf'), 'config', 'camera_config.yaml')
+    if not os.path.exists(camera_config_path):
+        raise FileNotFoundError(f"Parameter file {camera_config_path} does not exist")
+
+    controller_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_velocity_controller', 'joint_state_broadcaster'],
+        output='screen'
+    )
+
 
     return LaunchDescription([
         DeclareLaunchArgument(name='model', default_value=default_model_path,
-                                    description='Absolute path to robot urdf file'),
+                              description='Absolute path to robot urdf file'),
         robot_state_publisher_node,
         joint_state_publisher_node,
         spawn_entity,
@@ -48,4 +63,5 @@ def generate_launch_description():
         ExecuteProcess(
             cmd=['rviz2', '-d', rviz_config_path],
             output='screen'),
+        controller_spawner,
     ])
