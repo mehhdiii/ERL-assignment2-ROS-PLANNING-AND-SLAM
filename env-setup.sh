@@ -16,12 +16,10 @@ apt install ros-humble-ros2-control &&
 apt install ros-humble-ros2-controllers &&
 apt install ros-humble-behaviortree-cpp && 
 apt install ros-humble-plansys2-pddl-parser &&
-sudo apt install libsuitesparse-dev &&
-sudo apt-get install ros-humble-rviz2 && 
-sudo apt install ros-humble-gazebo-ros-pkgs &&
+apt install libsuitesparse-dev &&
+apt install ros-humble-rviz2 && 
+apt install ros-humble-gazebo-ros-pkgs &&
+apt install '~nros-humble-rqt*' &&
 cp -r /data/data/aruco_ros/aruco_ros/models /root/.gazebo/models &&
-sudo apt install '~nros-humble-rqt*' &&
 echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc &&
 echo 'source /data/ros_ws/install/setup.bash' >> ~/.bashrc
-
-# bash -c "echo 'hello world' r > /tmp/hello.txt"
