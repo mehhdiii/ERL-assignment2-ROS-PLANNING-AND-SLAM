@@ -8,6 +8,11 @@ This project is developed by:
 3. *Younes Hebik - s5813030*
 4. *Ozan Pali - s5831146*
 
+## Demo
+Watch our demo video below:
+
+  [![Watch the video](https://img.youtube.com/vi/YxPhdKM9SUE/hqdefault.jpg)](https://www.youtube.com/watch?v=YxPhdKM9SUE)
+
 ## Dependencies
 
 1. **PlanSys2:**    - [PlanSys2 GitHub Repository](https://github.com/PlanSys2/ros2_planning_system/tree/humble-devel)
