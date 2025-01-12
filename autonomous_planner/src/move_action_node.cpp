@@ -48,7 +48,6 @@ public:
     wp.header.stamp = now();
     wp.pose.position.x = 5.2;
     wp.pose.position.y = 2.3;
-    wp.pose.position.z = 0.01;
     waypoints_["wp1"] = wp;
 
     wp.pose.position.x = 6.97;
