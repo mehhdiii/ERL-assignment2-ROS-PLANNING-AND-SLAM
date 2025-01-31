@@ -48,7 +48,7 @@ ament_target_dependencies(scan_marker_action_node ${dependencies})
 add_executable(controller_node src/controller_node.cpp)
 ament_target_dependencies(controller_node ${dependencies})
 
-install(DIRECTORY launch pddl params DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch pddl params configs DESTINATION share/${PROJECT_NAME})
 
 
 install(TARGETS
