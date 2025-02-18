@@ -3,7 +3,6 @@
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
-
 In this project a mobile robot is planned to visit 4 waypoints in the Gazebo world, And goes to the waypoint with the Aruco-marker that has smallest id. It uses PlanSys2 for planning, Navigation2 for navigation, and detection of Aruco markers using the ros2 Aruco library. 
 
 This project is developed by:
