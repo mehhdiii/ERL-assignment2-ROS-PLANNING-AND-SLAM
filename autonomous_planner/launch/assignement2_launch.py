@@ -4,10 +4,12 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 import os
+import yaml
 
 def generate_launch_description():
 
     test_robot_description_share = FindPackageShare(package='autonomous_planner').find('autonomous_planner')
+    built_map_path = os.path.join(test_robot_description_share, 'configs/mymap')
     slam_params_file_path = os.path.join(test_robot_description_share, 'params/mapper_params_online_sync.yaml')
     params_file_path = os.path.join(test_robot_description_share, 'params/nav2_params.yaml')
 
@@ -24,10 +26,28 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(robot_urdf_launch_dir, 'rosbot.launch.py'))
     )
 
+        # Path for the temporary YAML file
+    temp_slam_params_path = os.path.join(
+        test_robot_description_share, 'params/temp.yaml'
+    )
+
+    # Create the temporary YAML file with updated parameters
+    with open(slam_params_file_path, 'r') as file:
+        params = yaml.safe_load(file)
+
+    params['slam_toolbox']['ros__parameters']['map_file_name'] = built_map_path
+
+    try:
+        with open(temp_slam_params_path, 'w') as file:
+            yaml.dump(params, file)
+    except Exception as e:
+        print('Error writing the temporary YAML file: ', e)
+
+
     # Include the slam_toolbox launch file with parameters
     slam_toolbox_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(slam_toolbox_launch_dir, 'online_sync_launch.py')),
-        launch_arguments={'slam_params_file': slam_params_file_path}.items()
+        launch_arguments={'slam_params_file': temp_slam_params_path}.items()
     )
 
     # Include the nav2_bringup launch file with parameters
